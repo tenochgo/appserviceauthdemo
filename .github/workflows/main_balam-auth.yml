@@ -73,4 +73,5 @@ jobs:
         with:
           app-name: 'balam-auth'
           slot-name: 'Production'
+          startup-command: 'gunicorn --config gunicorn.conf.py "app:create_app()"'
           
