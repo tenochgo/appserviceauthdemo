@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Azure App Service Easy Auth + App Roles</div>
+    <h1 class="hero-title">Role-Based Access<br/>Made Simple</h1>
+    <p class="hero-subtitle">
+      This demo shows how <strong>Easy Auth</strong> and <strong>Microsoft Entra App Roles</strong>
+      protect pages based on who you are — no extra auth code required.
+    </p>
+
+    {% if principal.is_authenticated %}
+      <div class="hero-cta">
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-lg">Go to Dashboard</a>
+        {% if principal.has_role(ROLE_PREMIUM, ROLE_ADMIN) %}
+          <a href="{{ url_for('main.premium') }}" class="btn btn-secondary btn-lg">Premium Area</a>
+        {% endif %}
+      </div>
+      <p class="hero-signed-in">
+        Signed in as <strong>{{ principal.name }}</strong>
+        {% if principal.highest_role() %}
+          &mdash; role: <em>{{ principal.highest_role() }}</em>
+        {% else %}
+          &mdash; <span class="text-warning">no role assigned</span>
+        {% endif %}
+      </p>
+    {% else %}
+      <div class="hero-cta">
+        <a href="/.auth/login/aad?post_login_redirect_uri=/" class="btn btn-primary btn-lg">Sign in with Microsoft</a>
+      </div>
+      <p class="hero-hint">You are browsing anonymously. Sign in to access role-gated content.</p>
+    {% endif %}
+  </div>
+
+  <div class="hero-visual" aria-hidden="true">
+    <div class="shield-wrap">
+      <svg viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg" class="shield-svg">
+        <path d="M60 4L108 24V72C108 100 84 126 60 136C36 126 12 100 12 72V24L60 4Z"
+              fill="url(#shield-grad)" opacity="0.18"/>
+        <path d="M60 12L100 30V72C100 96 80 120 60 130C40 120 20 96 20 72V30L60 12Z"
+              fill="url(#shield-grad)" opacity="0.3"/>
+        <path d="M60 24L92 38V70C92 88 78 108 60 116C42 108 28 88 28 70V38L60 24Z"
+              fill="url(#shield-grad)" opacity="0.5"/>
+        <path d="M46 70l10 10 18-20" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs>
+          <linearGradient id="shield-grad" x1="12" y1="4" x2="108" y2="136" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#6366f1"/>
+            <stop offset="1" stop-color="#8b5cf6"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="roles-overview">
+  <div class="container">
+    <h2 class="section-title">Four Roles, Four Experiences</h2>
+    <p class="section-subtitle">Each role unlocks a different level of access in this app.</p>
+
+    <div class="cards-grid">
+      <div class="card card-anonymous">
+        <div class="card-icon">🌐</div>
+        <h3>Anonymous</h3>
+        <p>Can see this landing page. No sign-in required. No access to protected routes.</p>
+        <ul class="access-list">
+          <li class="allowed">Home / Landing</li>
+          <li class="denied">Dashboard</li>
+          <li class="denied">Premium</li>
+          <li class="denied">Admin</li>
+        </ul>
+      </div>
+
+      <div class="card card-regular">
+        <div class="card-icon">👤</div>
+        <h3>Regular User</h3>
+        <p>Signed in with the <code>User</code> app role. Access to general authenticated content.</p>
+        <ul class="access-list">
+          <li class="allowed">Home / Landing</li>
+          <li class="allowed">Dashboard</li>
+          <li class="denied">Premium</li>
+          <li class="denied">Admin</li>
+        </ul>
+      </div>
+
+      <div class="card card-premium">
+        <div class="card-icon">⭐</div>
+        <h3>Premium User</h3>
+        <p>Signed in with the <code>Premium</code> app role. Everything a regular user can see, plus premium features.</p>
+        <ul class="access-list">
+          <li class="allowed">Home / Landing</li>
+          <li class="allowed">Dashboard</li>
+          <li class="allowed">Premium</li>
+          <li class="denied">Admin</li>
+        </ul>
+      </div>
+
+      <div class="card card-admin">
+        <div class="card-icon">🛡️</div>
+        <h3>Admin</h3>
+        <p>Signed in with the <code>Admin</code> app role. Full access including the admin dashboard.</p>
+        <ul class="access-list">
+          <li class="allowed">Home / Landing</li>
+          <li class="allowed">Dashboard</li>
+          <li class="allowed">Premium</li>
+          <li class="allowed">Admin</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how-it-works">
+  <div class="container">
+    <h2 class="section-title">How It Works</h2>
+    <ol class="steps">
+      <li class="step">
+        <div class="step-number">1</div>
+        <div class="step-body">
+          <strong>Easy Auth intercepts the request</strong>
+          <p>Azure App Service Easy Auth checks for a valid Entra ID token before the request reaches your app.</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-number">2</div>
+        <div class="step-body">
+          <strong>Claims are injected as a header</strong>
+          <p>The <code>X-MS-CLIENT-PRINCIPAL</code> header carries a base64-encoded JSON payload with all user claims, including <code>roles</code>.</p>
+        </div>
+      </li>
+      <li class="step">
+        <div class="step-number">3</div>
+        <div class="step-body">
+          <strong>Flask reads and enforces roles</strong>
+          <p>A simple decorator checks the roles claim and either grants access or returns a friendly 403 — no token validation code needed.</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+{% endblock %}

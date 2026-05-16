@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="page-header-inner">
+      <div>
+        <div class="page-eyebrow">Authenticated Area</div>
+        <h1>Welcome back, {{ principal.name }}</h1>
+        <p class="page-subtitle">You have access because you hold a valid App Role on this application.</p>
+      </div>
+      <div class="header-badges">
+        {% for badge in principal.role_badges() %}
+          <span class="badge badge-lg {{ badge.color }}">{{ badge.label }}</span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container page-body">
+  <div class="info-banner">
+    <svg viewBox="0 0 20 20" fill="currentColor" class="info-icon"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+    <div>
+      <strong>How you got here:</strong> The <code>@require_roles</code> decorator on the <code>/dashboard</code> route
+      confirmed your token contains one of <code>User</code>, <code>Premium</code>, or <code>Admin</code>.
+    </div>
+  </div>
+
+  <div class="cards-grid cards-grid--3">
+    <div class="card">
+      <div class="card-label">Your identity</div>
+      <div class="stat-value">{{ principal.name }}</div>
+      <div class="stat-detail">{{ principal.email or "—" }}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Object ID</div>
+      <div class="stat-value mono text-sm">{{ principal.object_id[:8] }}…</div>
+      <div class="stat-detail">from <code>oid</code> claim</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Assigned roles</div>
+      <div class="stat-value">
+        {% if principal.roles %}
+          {{ principal.roles | join(", ") }}
+        {% else %}
+          None
+        {% endif %}
+      </div>
+      <div class="stat-detail">from <code>roles</code> claim</div>
+    </div>
+  </div>
+
+  <div class="feature-block">
+    <h2>What you can access</h2>
+    <div class="feature-grid">
+      <div class="feature-item allowed">
+        <span class="feature-check">✓</span>
+        <div>
+          <strong>Dashboard (this page)</strong>
+          <p>Available to all signed-in users with any role.</p>
+        </div>
+      </div>
+      <div class="feature-item {% if principal.has_role(ROLE_PREMIUM, ROLE_ADMIN) %}allowed{% else %}locked{% endif %}">
+        <span class="feature-check">{% if principal.has_role(ROLE_PREMIUM, ROLE_ADMIN) %}✓{% else %}🔒{% endif %}</span>
+        <div>
+          <strong>Premium Area</strong>
+          <p>Requires <code>Premium</code> or <code>Admin</code> role.
+            {% if not principal.has_role(ROLE_PREMIUM, ROLE_ADMIN) %}
+              Ask an admin to grant you the <code>Premium</code> role.
+            {% endif %}
+          </p>
+        </div>
+      </div>
+      <div class="feature-item {% if principal.has_role(ROLE_ADMIN) %}allowed{% else %}locked{% endif %}">
+        <span class="feature-check">{% if principal.has_role(ROLE_ADMIN) %}✓{% else %}🔒{% endif %}</span>
+        <div>
+          <strong>Admin Panel</strong>
+          <p>Requires the <code>Admin</code> role.
+            {% if not principal.has_role(ROLE_ADMIN) %}
+              Only administrators can access this section.
+            {% endif %}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

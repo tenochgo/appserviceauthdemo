@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Admin{% endblock %}
+
+{% block head %}
+<style>
+  /* Scoped admin chart styles */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; }
+  .kpi-label { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .kpi-value { font-size: 2rem; font-weight: 700; color: var(--text); margin: .25rem 0; }
+  .kpi-delta { font-size: .8rem; color: var(--success); }
+  .kpi-delta.down { color: var(--danger); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header page-header--admin">
+  <div class="container">
+    <div class="page-header-inner">
+      <div>
+        <div class="page-eyebrow">Admin Panel</div>
+        <h1>Admin Dashboard</h1>
+        <p class="page-subtitle">Full control — only users with the <strong>Admin</strong> role can see this page.</p>
+      </div>
+      <div class="header-badges">
+        <span class="badge badge-lg role-admin">Admin</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container page-body">
+  <div class="info-banner info-banner--admin">
+    <svg viewBox="0 0 20 20" fill="currentColor" class="info-icon"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+    <div>
+      <strong>Admin access confirmed.</strong> The <code>@require_roles("Admin")</code> decorator
+      verified your token before rendering this page.
+      Signed in as <strong>{{ principal.name }}</strong>.
+    </div>
+  </div>
+
+  <!-- KPI Cards (rendered by admin.js with mock data) -->
+  <div class="kpi-grid" id="kpi-grid"></div>
+
+  <!-- Chart -->
+  <div class="cards-grid cards-grid--2">
+    <div class="card" style="grid-column: 1 / -1;">
+      <div class="card-header-row">
+        <h3>Monthly Active Users</h3>
+        <span class="badge role-regular">Last 6 months</span>
+      </div>
+      <div id="admin-chart" style="margin-top:1rem;"></div>
+    </div>
+  </div>
+
+  <!-- Recent Users Table -->
+  <div class="card" style="margin-top: 1.5rem;">
+    <div class="card-header-row">
+      <h3>Recent Signins</h3>
+      <span class="badge role-admin">Mock data</span>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="users-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Last Sign-in</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Role Assignments -->
+  <div class="cards-grid cards-grid--3" style="margin-top: 1.5rem;">
+    <div class="card">
+      <div class="card-label">Regular Users</div>
+      <div class="stat-value" id="count-regular">—</div>
+      <div class="stat-detail">with <code>User</code> role</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Premium Users</div>
+      <div class="stat-value" id="count-premium">—</div>
+      <div class="stat-detail">with <code>Premium</code> role</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Admins</div>
+      <div class="stat-value" id="count-admin">—</div>
+      <div class="stat-detail">with <code>Admin</code> role</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

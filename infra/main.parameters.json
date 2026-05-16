@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appName":          { "value": "easyauth-demo" },
+    "location":         { "value": "westcentralus" },
+    "aadTenantId":      { "value": "<YOUR_TENANT_ID>" },
+    "aadClientId":      { "value": "<YOUR_CLIENT_ID>" },
+    "aadClientSecret":  { "value": "<YOUR_CLIENT_SECRET>" },
+    "planSku":          { "value": "B1" }
+  }
+}
