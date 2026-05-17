@@ -13,6 +13,17 @@
   const yearEl = document.querySelector(".footer-year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
+  // Token inspector toggle
+  const toggle = document.getElementById("token-toggle");
+  const body   = document.getElementById("token-body");
+  if (toggle && body) {
+    toggle.addEventListener("click", () => {
+      const expanded = toggle.getAttribute("aria-expanded") === "true";
+      toggle.setAttribute("aria-expanded", String(!expanded));
+      body.hidden = expanded;
+    });
+  }
+
   // Button ripple effect
   document.addEventListener("click", (e) => {
     const btn = e.target.closest(".btn");

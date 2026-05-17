@@ -64,6 +64,15 @@ echo "🔧  Setting accessTokenAcceptedVersion to 2..."
 az ad app update --id "${APP_ID}" \
   --set "api={\"requestedAccessTokenVersion\":2}" >/dev/null 2>&1 || true
 
+# ── Enable ID token implicit grant (required by Easy Auth) ────────────────────
+# Easy Auth uses the implicit flow to obtain an ID token for the browser session.
+# Without this, sign-in fails with AADSTS700054.
+echo "🔧  Enabling ID token implicit grant..."
+az rest --method PATCH \
+  --uri "https://graph.microsoft.com/v1.0/applications/${OBJECT_ID}" \
+  --headers "Content-Type=application/json" \
+  --body '{"web": {"implicitGrantSettings": {"enableIdTokenIssuance": true}}}' >/dev/null
+
 # ── Define App Roles (idempotent PATCH) ───────────────────────────────────────
 echo "🎭  Configuring App Roles (User, Premium, Admin)..."
 
@@ -75,7 +84,7 @@ APP_ROLES_JSON=$(cat <<'EOF'
     "description": "Regular user with access to authenticated content.",
     "displayName": "Regular User",
     "isEnabled": true,
-    "value": "User"
+    "value": "User.Regular"
   },
   {
     "id": "a1b2c3d4-0002-0002-0002-000000000002",
@@ -83,7 +92,7 @@ APP_ROLES_JSON=$(cat <<'EOF'
     "description": "Premium user with access to premium features.",
     "displayName": "Premium User",
     "isEnabled": true,
-    "value": "Premium"
+    "value": "User.Premium"
   },
   {
     "id": "a1b2c3d4-0003-0003-0003-000000000003",
@@ -91,7 +100,7 @@ APP_ROLES_JSON=$(cat <<'EOF'
     "description": "Administrator with full access including the admin panel.",
     "displayName": "Admin",
     "isEnabled": true,
-    "value": "Admin"
+    "value": "User.Admin"
   }
 ]
 EOF

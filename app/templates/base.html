@@ -62,6 +62,84 @@
     {% block content %}{% endblock %}
   </main>
 
+  <!-- ── Token Inspector (demo panel) ──────────────────────────────────── -->
+  <section class="token-inspector" id="token-inspector">
+    <div class="token-inspector-inner">
+      <button class="token-toggle" id="token-toggle" aria-expanded="false" aria-controls="token-body">
+        <span class="token-toggle-icon">🔍</span>
+        <span class="token-toggle-label">Token Inspector</span>
+        <span class="token-toggle-note">Easy Auth claims &amp; App Roles — for demo purposes</span>
+        <svg class="token-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+      </button>
+
+      <div class="token-body" id="token-body" hidden>
+        {% if principal.is_authenticated %}
+          <div class="token-grid">
+
+            <div class="token-section">
+              <div class="token-section-title">Principal (parsed by app)</div>
+              <table class="token-table">
+                <tr><th>Field</th><th>Value</th></tr>
+                <tr><td>name</td><td><code>{{ principal.name }}</code></td></tr>
+                <tr><td>email</td><td><code>{{ principal.email or "—" }}</code></td></tr>
+                <tr><td>object_id</td><td><code>{{ principal.object_id or "—" }}</code></td></tr>
+                <tr>
+                  <td>roles</td>
+                  <td>
+                    {% if principal.roles %}
+                      {% for r in principal.roles | sort %}
+                        <code class="token-role">{{ r }}</code>
+                      {% endfor %}
+                    {% else %}
+                      <span class="token-empty">none assigned</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                <tr><td>is_authenticated</td><td><code>true</code></td></tr>
+              </table>
+            </div>
+
+            <div class="token-section">
+              <div class="token-section-title">Raw claims from <code>X-MS-CLIENT-PRINCIPAL</code></div>
+              <div class="token-claims-scroll">
+                <table class="token-table">
+                  <tr><th>typ</th><th>val</th></tr>
+                  {% for claim in principal.raw_claims %}
+                    <tr>
+                      <td><code>{{ claim.typ }}</code></td>
+                      <td><code>{{ claim.val }}</code></td>
+                    </tr>
+                  {% endfor %}
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="token-explainer">
+            <strong>How this works:</strong>
+            Easy Auth decoded the Entra ID token and injected the claims above as a
+            base64-encoded JSON header (<code>X-MS-CLIENT-PRINCIPAL</code>).
+            Your Flask app never sees the raw JWT — just this header.
+            The <code>roles</code> claims come from the <strong>App Role assignments</strong>
+            on the Enterprise Application in Entra ID.
+          </div>
+
+        {% else %}
+          <div class="token-anon">
+            <span class="token-anon-icon">🌐</span>
+            <div>
+              <strong>Anonymous request</strong>
+              <p>No <code>X-MS-CLIENT-PRINCIPAL</code> header present. Easy Auth did not
+              authenticate this request — the landing page is public (<code>unauthenticatedClientAction: AllowAnonymous</code>).
+              Sign in to see your token claims.</p>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
   <footer class="footer">
     <div class="footer-inner">
       <p>Azure App Service Easy Auth + App Roles demo &mdash;

@@ -25,10 +25,16 @@ from flask import g, redirect, render_template, request
 # ---------------------------------------------------------------------------
 # Role constants — must match the "value" field of the App Roles defined in
 # your App Registration manifest.
+#
+# Best-practice note: simple names ("Admin") and prefixed names ("User.Admin")
+# are both valid. The prefix pattern ("User.*") is useful when a single app
+# registration exposes roles for multiple resource types and you want to avoid
+# name collisions. Either works; just keep the Python constants in sync with
+# whatever values you set in the portal.
 # ---------------------------------------------------------------------------
-ROLE_REGULAR = "User"
-ROLE_PREMIUM = "Premium"
-ROLE_ADMIN = "Admin"
+ROLE_REGULAR = "User.Regular"
+ROLE_PREMIUM = "User.Premium"
+ROLE_ADMIN   = "User.Admin"
 
 ALL_ROLES = {ROLE_REGULAR, ROLE_PREMIUM, ROLE_ADMIN}
 
@@ -47,6 +53,7 @@ class Principal:
     object_id: str = ""
     roles: Set[str] = field(default_factory=set)
     is_authenticated: bool = False
+    raw_claims: list = field(default_factory=list)  # all claims from the token, for demo display
 
     # ------------------------------------------------------------------
     # Convenience helpers
@@ -127,6 +134,7 @@ def get_principal() -> Principal:
         object_id=oid,
         roles=roles,
         is_authenticated=True,
+        raw_claims=payload.get("claims", []),
     )
 
 
