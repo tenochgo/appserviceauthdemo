@@ -10,3 +10,4 @@ build/
 .pytest_cache/
 infra/main.parameters.local.json
 *.zip
+linkedin-auth-series-1.md
